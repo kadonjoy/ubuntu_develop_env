@@ -1,0 +1,23 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=4597
+
+This plug-in contains Vim scripts that are used by most of the Vim plug-ins I've written yet don't really belong with any single one of the plug-ins. Basically it's an extended standard library of Vim script functions that I wrote during the development of my Vim profile and plug-ins.
+
+In the past these scripts were bundled with each plug-in, however that turned out to be a maintenance nightmare for me. That's why the miscellaneous scripts are now a proper plug-in with their own page on Vim Online.
+
+For more information about the miscellaneous scripts please refer to the homepage or the project page on GitHub:
+
+  http://peterodding.com/code/vim/misc/ 
+  http://github.com/xolox/vim-misc
+
+If you have questions, bug reports, suggestions, etc. the author can be contacted at peter@peterodding.com. If you like this plug-in please vote for it below!
+
+The following plug-ins of mine depend on the installation of the miscellaneous scripts as a separate plug-in:
+
+  vim-colorscheme-switcher (vimscript #4586)
+  vim-easytags (vimscript #3114)
+  vim-lua-ftplugin (vimscript #3625)
+  vim-lua-inspect (vimscript #3169)
+  vim-notes (vimscript #3375)
+  vim-reload (vimscript #3148)
+  vim-session (vimscript #3150)
+  vim-shell (vimscript #3123)
