@@ -40,10 +40,15 @@ if has("cscope")
     " add any cscope database in current directory
     if filereadable("cscope.out")
         cs add cscope.out  
-    " else add the database pointed to by environment variable 
-    elseif $CSCOPE_DB != ""
-        cs add $CSCOPE_DB
+	" else search cscope.out elsewhere
+    else
+        let cscope_file=findfile("cscope.out",".;")
+        let cscope_pre=matchstr(cscope_file,".*/")
+        if !empty(cscope_file) && filereadable(cscope_file)
+            exe "cs add" cscope_file cscope_pre
+        endif
     endif
+    set csverb
 
     " show msg when any other cscope db added
     set cscopeverbose  
