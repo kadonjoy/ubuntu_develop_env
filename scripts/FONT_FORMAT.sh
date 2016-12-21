@@ -1,0 +1,11 @@
+# 字体颜色打印
+RED_FONT="\033[31m\n"
+GREEN_FONT="\033[32m\n"
+YELLOW_FONT="\033[33m\n"
+BLUE_FONT="\033[34m\n"
+PURPLE_FONT="\033[35m\n"
+DEEP_GREEN_FONT="\033[36m\n"
+WHITE_FONT="\033[37m\n"
+COLOR_EOF="\033[0m"
+HIGHLIGHT="\033[1m"
+PROMPT="\n#############################################################\n"
