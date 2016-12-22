@@ -19,43 +19,43 @@ function usage_help ()
 {
     printf $DEEP_GREEN_FONT"Android Auto Flash Shareed Lib Script Rev %s\n"$COLOR_EOF $VERSION
     echo "Usage is:
-    AutoFlash <OPTION> <libname> <OPTION> <libname> ...
+    AutoFlash <OPTION> <libname> <OPTION> <processname> ...
 
     AutoFlash script will help to get lib from remote host,
     and to flash them into device.
 
     -OPTIONS are:
-        --get <libname>         - Get lib from remote host
-        --flash <libname>       - Flash the lib into android device
-        --help                  - Print some help information 
+        -g --get <libname>         - Get lib from remote host and flash lib into device
+        -h --help                  - Print some help information
+        -k --kill                  - The process name to be restarted
     -libname are some shared libs relates to camera.
         example: camera.msm8996
     -example:
-        AutoFlash.sh --get libmmcamera_ov13870 --flash libmmcamera_ov13870
+        AutoFlash.sh -g libmmcamera_ov13870 -k media
     "
     exit 0
 }
 
 function flash()
 {
-    printf $RED_FONT"Enter flash...\n"$COLOR_EOF
+    printf $DEEP_GREEN_FONT"... Enter Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
     if [ ! -z $1 ]; then
         printf $RED_FONT"LIB PATH: %s\n"$COLOR_EOF ${DEV_LIB_PATH}
         adb push ./libs/$1.so ${DEV_LIB_PATH}
     else
         printf $RED_FONT"Please input appropriate paramter(lib name)...\n"$COLOR_EOF
     fi
-    printf $RED_FONT"Exit flash...\n"$COLOR_EOF
+    printf $DEEP_GREEN_FONT"... Exit Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
 }
 
 function get_libs()
 {
-    printf $RED_FONT"Enter get_libs...\n"$COLOR_EOF
+    printf $DEEP_GREEN_FONT"... Enter Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
     DEV_LIB_PATH=""
     if [ ! -z $1 ] ; then
         for lib_path in ${LIB_PATHES[@]}; do
             #printf $RED_FONT"LIB PATH: %s\n"$COLOR_EOF ${lib_path}
-            scp andbase@${SERVER_IP}:${WORK_PATH}out/target/product/${TARGET}${lib_path}$1.so ./libs
+            scp andbase@${SERVER_IP}:${WORK_PATH}out/target/product/${TARGET}${lib_path}$1.so ./libs > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 DEV_LIB_PATH=${lib_path}
                 break;
@@ -64,24 +64,43 @@ function get_libs()
     else
         printf $RED_FONT"Please input appropriate paramter(lib name)...\n"$COLOR_EOF
     fi
-    printf $RED_FONT"Exit get_libs...\n"$COLOR_EOF
+    printf $DEEP_GREEN_FONT"... Exit Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
+}
+
+function killcam()
+{
+    printf $DEEP_GREEN_FONT"... Enter Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
+    if [ "x"${1} == "xmedia" ]; then
+        printf $RED_FONT"PREPARE TO killing media server"$COLOR_EOF
+        MEDIASERVER_PID=$(adb shell ps | grep 'mediaserver' | awk -F" " '{print $2}')
+        adb shell kill -9 ${MEDIASERVER_PID}
+        printf $RED_FONT$PROMPT$COLOR_EOF
+        printf $RED_FONT"Killing mediaserver  process : %s\n"$COLOR_EOF ${MEDIASERVER_PID}
+    elif [ "x"${1} == "xdaemon" ]; then
+        DAEMON_PID=$(adb shell ps | grep 'mm-qcamera-daemon' | awk -F" " '{print $2}')
+        adb shell kill -9 ${DAEMON_PID}
+        printf $HIGH_LIGHT$GREEN_FONT$PROMPT$COLOR_EOF
+        printf $GREEN_FONT"Killing camera daemon process : %s\n"$COLOR_EOF ${DAEMON_PID}
+    fi
+    printf $DEEP_GREEN_FONT"... Exit Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
 }
 
 function main()
 {
     while [ ! -z "$1" ]; do
         case $1 in
-            --get)
+            --get | -g)
                 printf $RED_FONT$PROMPT$COLOR_EOF
                 printf $RED_FONT"%s %s\n"$COLOR_EOF $1 $2
                 get_libs $2
-            ;;
-            --flash)
-                printf $BLUE_FONT$PROMPT$COLOR_EOF
-                printf $BLUE_FONT"%s %s\n"$COLOR_EOF $1 $2
                 flash $2
             ;;
-            --help)
+            --kill | -k)
+                printf $BLUE_FONT$PROMPT$COLOR_EOF
+                printf $BLUE_FONT"%s %s\n"$COLOR_EOF $1 $2
+                killcam $2
+            ;;
+            --help | -h)
                 usage_help
             ;;
             *)
