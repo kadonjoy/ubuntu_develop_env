@@ -34,6 +34,7 @@ Bundle 'honza/vim-snippets'
 Bundle 'godlygeek/tabular'
 Bundle 'majutsushi/tagbar'
 Bundle 'vim-cscope'
+Bundle 'Valloric/YouCompleteMe'
 
 filetype plugin indent on
 
@@ -48,6 +49,7 @@ set shiftwidth=4
 set incsearch
 set hlsearch
 set nu
+set ic
 
 syntax on
 
@@ -69,10 +71,13 @@ nmap <leader>x :wq<CR>
 nmap <leader>z :q!<CR>
 nmap <leader>w :NERDTreeToggle<CR>
 nmap <F4> :qa!<CR>
+" increase window size
 nmap <C-h> :vertical res +1<CR>
+" decrease window size
 nmap <C-l> :vertical res -1<CR>
 
-au filetype c,cpp,java,sh nmap <leader>t :TlistToggle<CR>
+" au filetype c,cpp,java,sh nmap <leader>t :TlistToggle<CR>
+au filetype c,cpp,java,sh nmap <F6> :TlistToggle<CR>
 "au filetype javascript colorscheme monokai-chris
 "au filetype go colorscheme inkpot
 
