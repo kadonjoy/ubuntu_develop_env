@@ -3,14 +3,16 @@
 #
 # Author: kadon
 # USAGE:
-#        AutoFlash.sh --get libmmcamera_ov13870 --flash libmmcamera_ov13870
+#        AutoFlash.sh -g libmmcamera_ov13870 -k media
 #
-source ./FONT_FORMAT.sh
+source ~/FONT_FORMAT.sh
 
 VERSION="0.1"
 TARGET="le_x10"
-WORK_PATH="/letv/workspace/leui_mainline/"
 SERVER_IP="10.142.130.25"
+WORK_PATH="/letv/workspace/leui_mainline/"
+SERVER_IP="10.142.132.221"
+WORK_PATH="/home/andbase/workspace/work/x10_pnp/"
 LIB_PATHES=("/system/vendor/lib/" "/system/lib/hw/" "/system/lib/")
 IMAGES_LIST=("boot" "system" "userdata")
 DEV_LIB_PATH=""
@@ -18,7 +20,8 @@ DEV_LIB_PATH=""
 function usage_help ()
 {
     printf $DEEP_GREEN_FONT"Android Auto Flash Shareed Lib Script Rev %s\n"$COLOR_EOF $VERSION
-    echo "Usage is:
+cat << EOF
+    Usage is:
     AutoFlash <OPTION> <libname> <OPTION> <processname> ...
 
     AutoFlash script will help to get lib from remote host,
@@ -32,7 +35,7 @@ function usage_help ()
         example: camera.msm8996
     -example:
         AutoFlash.sh -g libmmcamera_ov13870 -k media
-    "
+EOF
     exit 0
 }
 
@@ -41,7 +44,11 @@ function flash()
     printf $DEEP_GREEN_FONT"... Enter Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
     if [ ! -z $1 ]; then
         printf $RED_FONT"LIB PATH: %s\n"$COLOR_EOF ${DEV_LIB_PATH}
+        adb remount
         adb push ./libs/$1.so ${DEV_LIB_PATH}
+        adb shell sync
+        sleep 1
+        printf $DEEP_GREEN_FONT"[PUSH: succeeded]"$COLOR_EOF
     else
         printf $RED_FONT"Please input appropriate paramter(lib name)...\n"$COLOR_EOF
     fi
@@ -58,6 +65,7 @@ function get_libs()
             scp andbase@${SERVER_IP}:${WORK_PATH}out/target/product/${TARGET}${lib_path}$1.so ./libs > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 DEV_LIB_PATH=${lib_path}
+                printf $DEEP_GREEN_FONT"[GET: succeeded]"$COLOR_EOF
                 break;
             fi
         done
