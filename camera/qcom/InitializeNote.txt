@@ -1,0 +1,342 @@
+1. module_sensor_init
+
+sensor_probe: [ov13870_rear] probe succeeded: session_id(2) entity_name(v4l-subdev19)
+sensor_create_sbundle: sensor name ov13870_rear session 2
+
+sensor_probe: [s5k3p3st_sunny] probe succeeded: session_id(3) entity_name(v4l-subdev20)
+sensor_create_sbundle: sensor name s5k3p3st_sunny session 3
+
+sensor_probe: [ov13371_mono] probe succeeded: session_id(4) entity_name(v4l-subdev21)
+sensor_create_sbundle: sensor name ov13371_mono session 4
+
+sensor_probe: [ov13371_fusion] probe succeeded: session_id(5) entity_name(v4l-subdev22)
+sensor_create_sbundle: sensor name ov13371_fusion session 5
+
+SUB_MODULE_CSIPHY:
+match found sub module 8 session id 2 subdev name v4l-subdev0
+match found sub module 8 session id 4 subdev name v4l-subdev1
+match found sub module 8 session id 5 subdev name v4l-subdev1 
+match found sub module 8 session id 3 subdev name v4l-subdev2 
+                                                              
+SUB_MODULE_CSID:                                              
+match found sub module 6 session id 2 subdev name v4l-subdev3 
+match found sub module 6 session id 4 subdev name v4l-subdev4 
+match found sub module 6 session id 5 subdev name v4l-subdev4 
+match found sub module 6 session id 3 subdev name v4l-subdev5 
+                                                              
+SUB_MODULE_ACTUATOR:                                          
+match found sub module 2 session id 2 subdev name v4l-subdev7 
+match found sub module 2 session id 4 subdev name v4l-subdev8 
+match found sub module 2 session id 5 subdev name v4l-subdev8 
+                                                              
+SUB_MODULE_EEPROM:                                            
+match found sub module 3 session id 2 subdev name v4l-subdev9 
+match found sub module 3 session id 4 subdev name v4l-subdev10
+match found sub module 3 session id 5 subdev name v4l-subdev10
+match found sub module 3 session id 3 subdev name v4l-subdev11
+                                                              
+SUB_MODULE_LED_FLASH:                                         
+match found sub module 4 session id 2 subdev name v4l-subdev12
+match found sub module 4 session id 4 subdev name v4l-subdev12
+                                                              
+v4l-subdev13 : MSM_CAMERA_SUBDEV_SENSOR_INIT                  
+v4l-subdev14 : MSM_CAMERA_SUBDEV_CPP                          
+v4l-subdev15,v4l-subdev16 : MSM_CAMERA_SUBDEV_VFE              
+v4l-subdev17 : MSM_CAMERA_SUBDEV_ISPIF                         
+v4l-subdev18 : MSM_CAMERA_SUBDEV_BUF_MNGR                      
+
+
+/dev/video0 msm_config
+/dev/video1 msm_fd
+                                                               
+                                                               
+                                                               
+                                                                 |--- sensor_bundle = mct_list_append(module_ctrl->sensor_bundle, sensor_bundle, NULL, NULL)
+                                                                 |--- size = 4 (For X10, there are 4 sensor bundle)
+                       |--- module_private(module_sensor_ctrl_t)-|---     
+                       |--- srcports = mct_list_append(module->srcports, s_port, NULL, NULL);  //4个sensor_bundle每个一个srcport                                      
+                       |--- numsrcports = 4                                       
+s_module(mct_module_t)-|--- set_mod = module_sensor_set_mod;                                     
+                       |--- query_mod = module_sensor_query_mod;                                      
+                       |--- start_session = module_sensor_start_session;                                      
+                       |--- set_session_data = module_sensor_set_session_data;                                      
+                                                               
+                   |--- direction = MCT_PORT_SRC;                                       
+                   |--- check_caps_reserve = port_sensor_caps_reserve;                                         
+s_port(mct_port_t)-|--- ext_link = port_sensor_ext_link_func;                                                                                                                       stream
+                   |--- event_func = port_sensor_port_process_event;                                                                                                          bundle_id identity dim 
+                   |--- caps.u.data = (void *)sensor_src_port_cap;                                                                                                         |-     -1     0x2000f 0x0
+                   |--- port_private = malloc(sizeof(module_sensor_port_data_t)); |--- stream_list = mct_list_append(port_data->stream_list, port_stream_info, NULL, NULL);|-    6656    0x20002 1440x1080
+                                                                                                                                                                           |-    6656    0x20003 2320x1740
+                                                                                                                                                                           |-    6656    0x20004 640x480
+2. module_iface_init                                    
+iface->module = mct_module_create(name);                      
+module->srcports 8个 mct_port->caps.port_caps_type = MCT_PORT_CAPS_FRAME;
+module->sinkports 8个 mct_port->caps.port_caps_type = MCT_PORT_CAPS_OPAQUE;
+                                                          |--- srcports = mct_list_append(module->srcports, src_port, NULL, NULL);
+                                                          |--- sinkports = mct_list_append(module->sinkports, sink_port, NULL, NULL);
+                                                          |--- module_private = iface;
+               |--- module(mct_module_t) = module_iface;--|--- set_mod = module_iface_set_mod_func;
+               |--- ispif_data.subdev_name = v4l-subdev17 |--- start_session = module_iface_start_session;
+               |--- ispif_data.num_subdev =1              |--- set_session_data = module_iface_set_session_data;
+               |--- isp_axi_data.isp_subdev[iface->isp_axi_data.num_subdev].subdev_name = v4l-subdev15,v4l-subdev16
+               |--- isp_axi_data.num_subdev = 2
+iface(iface_t)-|--- 
+               |---
+               |---
+               |---
+               |---
+               |--- sessions[i](iface_session_t)
+               |--- buf_mgr(iface_buf_mgr_t)
+
+                     |--- direction = [MCT_PORT_SRC,MCT_PORT_SINK]
+                     |--- caps.port_caps_type = [MCT_PORT_CAPS_FRAME,MCT_PORT_CAPS_OPAQUE];
+                     |--- caps.u.data = [(void *)&iface_port->u.src_port.caps, (void *)&iface_port->u.sink_port.sensor_cap];
+mct_port(mct_port_t)-|--- port_private = iface_port;
+[src,sink]           |--- event_func = port_iface_event_func;
+                     |--- set_caps = port_iface_set_caps_func;
+                     |--- check_caps_reserve = port_iface_check_caps_reserve_func;
+                         |--- port = mct_port;                                                               
+                         |--- iface = (void *)iface;                         +-----------------------------------------+
+                         |--- state = IFACE_PORT_STATE_CREATED;              + session_id  streamid  use_pix  link_cnt +
+iface_port(iface_port_t)-|--- u.sink_port.streams[i]------------------------>+      2         15        1         1    +
+[src,sink]               |--- u.src_port.streams[i]------------------------->+      2         2         1         1    +
+                         |--- u.src_port.caps.input_type = ISP_INPUT_ISPIF;  +      2         3         1         1    +
+                         |--- state = IFACE_PORT_STATE_RESERVED;             +      2         4         1         1    +
+                         |                                                   +-----------------------------------------+
+                         |--- u.src_port.caps.sensor_cap = iface_sink_port->u.sink_port.sensor_cap;
+
+
+
+3. module_isp_init
+                     |--- priv = isp(isp_t)
+                     |--- srcports = mct_list_append(module->srcports, src_port, NULL, NULL);
+                     |--- sinkports = mct_list_append(module->sinkports, sink_port, NULL, NULL);
+                     |--- set_mod = isp_module_set_mod
+                     |--- start_session = isp_module_start_session
+module(mct_module_t)-|--- set_session_data = isp_module_set_session_data
+                     |---
+                     |---
+                     |---
+
+
+                     |--- direction = [MCT_PORT_SRC,MCT_PORT_SINK]
+                     |--- caps.port_caps_type = [MCT_PORT_CAPS_FRAME,MCT_PORT_CAPS_STATS];  |--- hw_stream = ISP_HW_STREAM_MAX 等enum
+mct_port(mct_port_t)-|--- priv = isp_port_data(isp_port_data_t);----------------------------|--- hw_id = [0,1]
+[src,sink]           |--- caps.u.frame.format_flag = MCT_PORT_CAP_FORMAT_YCBCR
+                     |--- event_func = isp_port_event;
+                     |--- 
+                     |--- check_caps_reserve = isp_port_check_caps_reserve;
+每个VFE，1个sink port 6个src port. 每个stream(viewfinder,encoder,video)各一个，ISP_HW_STREAM_OFFLINE stream预留一个, 为ISP_HW_STREAM_MAX 预留2个，前5个都是frame类型，最后1个stats类型 
+
+
+
+           
+           
+                            
+                            
+                                                                                                     
+                                                        |--- subdev_name = v4l-subdev15                  |--- max_turbo_pix_clk = clk_rate.high_rate;
+           |---               |--- num_isp = 2          |--- isp_pipeline = isp_pipeline47_open(ver, 0);-|--- max_nominal_pix_clk = clk_rate.nominal_rate     
+           |---               |--- isp_resource_info[0]-|---                                             |---                                               
+isp(isp_t)-|--- isp_resource -|--- ++++++++++++++++++++++++                                              
+           |---               |--- isp_resource_info[1]-|--- subdev_name = v4l-subdev16                  |--- max_turbo_pix_clk = clk_rate.high_rate;
+           |---                                         |--- isp_pipeline = isp_pipeline47_open(ver, 1);-|--- max_nominal_pix_clk = clk_rate.nominal_rate
+           |---                                         |---                                             |--- common_hw_params = &common_hw_params
+                                                                                                         |--- stream_hw_params[ISP_HW_STREAM_VIEWFINDER] = &stream_hw_params[ISP_HW_STREAM_VIEWFINDER]
+                                                                                                         |--- stream_hw_params[ISP_HW_STREAM_ENCODER] = &stream_hw_params[ISP_HW_STREAM_ENCODER]
+                                                                                                         |--- stream_hw_params[ISP_HW_STREAM_VIDEO] = &stream_hw_params[ISP_HW_STREAM_VIDEO]
+                                                                                                         |--- func_table = &func_table
+                                                                                                         |--- is_ahb_clk_cfg_supported = TRUE
+                                                                                                         |--- common_hw_size = ARRAY_SIZE(common_hw)(26个)
+                                                                                                         |---                                   |--- isp_submod(mct_module_t)     |--- module_init
+                                                                                                         |--- common_hw_info(isp_submod_info_t)-|--- isp_submode_init_table-------|---- module_deinit 
+                                                                                                         |    (这个指针数组包含了26个isp子模块信息)
+                                                                                                         |--- num_hw_streams = 3[viewfinder,encoder,video];
+                                                                                                         |--- stream_hw_info(isp_submod_info_t)-|--- isp_submode_init_table-------|---- module_deinit
+                                                                                                      (这里有三个stream,每个stream有四个子模块) |--- isp_submode(mct_module_t)    |---- module_init
+                                                                                                      [color_xform_encoder46,scaler_encoder46,fovcrop_encoder46,clamp_encoder40]                                
+
+
+
+
+
+                             |--- sinkports = mct_list_append(module->sinkports, sink_port, NULL, NULL);
+                             |--- numsinkports = 1 per ISP
+                             |--- srcports = mct_list_append(module->srcports, port, NULL, NULL);
+isp_sub_module(mct_module_t)-|--- numsrcports = 3                                   |--- num_sink_ports = num_sink_ports;
+                             |--- set_mod = isp_sub_module_set_mod                  |--- num_source_ports = num_source_ports;
+                             |--- priv = isp_sub_module_priv(isp_sub_module_priv_t)-|--- private_func = private_func;
+                             |                                                      |--- hw_module_id = hw_module_id;
+                                                                                    |--- mod_id_for_log = mod_id;
+
+
+                     |--- priv = isp_sub_module_port_data(isp_sub_module_port_data_t)
+                     |--- event_func = isp_sub_module_port_event
+                     |--- ext_link = isp_sub_module_port_ext_link
+(subport             |--- caps.port_caps_type = MCT_PORT_CAPS_FRAME
+mct_port(mct_port_t)-|--- direction = [MCT_PORT_SRC,MCT_PORT_SINK]
+[src,sink]           |--- check_caps_reserve = isp_sub_module_port_check_caps_reserve
+                     |--- 
+                     
+                     
+                     
+
+
+if(isp_version >= ISP_MSM8996_V1) {
+  curr_pipeline->isp_version = SET_ISP_VERSION(ISP_VERSION_47, ISP_REVISION_V1);
+  curr_pipeline->num_pix = 1;
+  curr_pipeline->num_rdi = 3;
+  curr_pipeline->num_wms = 7;
+  curr_pipeline->num_register = ISP47_NUM_REG_DUMP;
+  curr_pipeline->isp_id = isp_id;
+  curr_pipeline->is_camif_crop_supported = FALSE;
+  curr_pipeline->is_camif_raw_op_fmt_supported = FALSE;
+
+  if (isp_id == ISP_HW_0) {
+    curr_pipeline->max_width = 6240;
+    curr_pipeline->max_height = 16383;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_ENCODER].max_width = 6240;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_ENCODER].max_height = 16383;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIEWFINDER].max_width = 4608;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIEWFINDER].max_height = 16383;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIDEO].max_width = 4608;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIDEO].max_height = 16383;
+  } else if (isp_id == ISP_HW_1) {
+    curr_pipeline->max_width = 4608;
+    curr_pipeline->max_height = 16383;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_ENCODER].max_width = 4608;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_ENCODER].max_height = 16383;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIEWFINDER].max_width = 4608;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIEWFINDER].max_height = 16383;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIDEO].max_width = 4608;
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_VIDEO].max_height = 16383;
+  }
+
+  curr_pipeline->hw_stream_info[ISP_HW_STREAM_IDEAL_RAW].max_width =
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_ENCODER].max_width;
+  curr_pipeline->hw_stream_info[ISP_HW_STREAM_IDEAL_RAW].max_height =
+    curr_pipeline->hw_stream_info[ISP_HW_STREAM_ENCODER].max_height;
+
+  curr_pipeline->max_nominal_pix_clk = ISP_PIX47_CLK_USER_MAX;
+  curr_pipeline->max_turbo_pix_clk = ISP_PIX_CLK_600MHZ;
+}
+
+4. pproc_module_init
+                     |--- 
+                     |--- start_session = pproc_module_start_session
+                     |--- set_mod = pproc_module_set_mod                  |--- num_sub_mods = sizeof["cpp","vpe","c2d","ppeiscore","vpu","tmod"...]
+pproc(mct_module_t)--+--- priv = mod_private(pproc_module_private_t)------|--- sub_mods[num_sub_mods] = pproc_modules_list[i].init_mod(pproc_modules_list[i].name);
+                     |--- request_new_port = pproc_module_request_new_port|
+                     |--- process_event = pproc_module_process_event
+                     |--- set_session_data = pproc_module_set_session_data
+                     |--- srcports = mct_list_append(module->srcports, pproc_port, NULL, NULL); 16个
+                     |--- sinkports = mct_list_append(module->sinkports, pproc_port, NULL, NULL); 16个
+
+
+
+
+                        |--- priv = port_private(pproc_port_private_t)
+                        |--- direction = [MCT_PORT_SRC,MCT_PORT_SINK]
+pproc_port(mct_port_t)--|--- event_func = [pproc_port_source_event,pproc_port_sink_event]
+                        |--- check_caps_reserve = [pproc_port_source_check_caps_reserve,pproc_port_sink_check_caps_reserve]
+                        |--- ext_link = pproc_port_ext_link
+                        |--- caps.port_caps_type  = MCT_PORT_CAPS_FRAME;
+                        |--- caps.u.frame.format_flag  = MCT_PORT_CAP_FORMAT_YCBCR;
+                        |--- caps.u.frame.size_flag    = MCT_PORT_CAP_SIZE_20MB;
+
+                          |--- priv = ctrl(cpp_module_ctrl_t)
+                          |--- set_mod = cpp_module_set_mod;
+                          |--- start_session = cpp_module_start_session;
+                          |--- set_session_data = cpp_module_set_session_data;
+cpp_moudle(mct_module_t)--|--- srcports = mct_list_append(module->srcports, port, NULL, NULL); 8个
+[sub_mod]                 |--- sinkports = mct_list_append(module->sinkports, port, NULL, NULL); 8个
+                          |
+                          |
+
+                                                      |--- num_iommu_cnt = 0;
+                                                      |--- private_data = &ctrl->pp_buf_mgr;
+                         |--- cpphw(cpp_hardware_t) --|--- subdev_ids[cpphw->num_subdev] = entity.revision;
+                         |--- session_count           |--- max_pending_buffer = CPP_HARDWARE_DEFAULT_PENDING_BUF;  
+                         |--- pfd[READ_FD] =          |--- subdev_fd = open("/dev/v4l-subdev14", O_RDWR | O_NONBLOCK); 
+                         |--- pfd[WRITE_FD] =         |--- status = CPP_HW_STATUS_FW_LOADED;
+ctrl(cpp_module_ctrl_t)--|--- p_module = cpp_module(mct_module_t)
+                         |--- realtime_queue                     
+                         |--- partial_frame_queue                    
+                         |--- offline_queue
+                         |--- ack_list
+                         |--- clk_rate_list                     |--- ion_fd = open("/dev/ion", O_RDONLY | O_SYNC);
+                         |--- pp_buf_mgr(pp_native_buf_mgr_t) --|--- client_id = CPP_CLIENT_ID
+
+
+5. module_imglib_init
+
+                         |--- set_session_data = module_imglib_set_session_data
+                         |--- module_private = (void *)p_mod;                                            |---
+                         |--- set_mod = module_imglib_set_mod                                            |---
+p_mct_mod(mct_module_t)--|--- start_session = module_imglib_start_session                                |---
+                         |--- process_event = module_imglib_process_event                                |--- caps.port_caps_type = MCT_PORT_CAPS_FRAME;
+                         |--- request_new_port = module_imglib_request_new_port                          |--- caps.u.frame.format_flag = MCT_PORT_CAP_FORMAT_YCBCR;
+                         |--- sinkports = mct_list_append(module->sinkports, port, NULL, NULL);----------|--- check_caps_reserve = module_imglib_port_check_caps_reserve
+                         |--- srcports = mct_list_append(module->sinkports, dummy_port, NULL, NULL)      |--- ext_link = module_imglib_port_ext_link
+                                                                                                         |---
+                                                                                                         |---
+                                                                                                         |---
+                                                                                                         |--- port_private = port_data(imglib_port_data_t) --|--- mirror_port[index] = mirror_port; 
+                                                                                                                                                             |--- num_mirror_ports = num_mirror_ports;
+                                                                                                                                                             (1个主sinkport,5个mirror的sink port)
+                                                                                                                                                             
+
+
+
+
+                        |--- scene_detect_mgr(img_scene_detect_mgr_t)
+                        |---
+                        |---
+                        |--- 这个topology指针数组管理着拓扑数组里的每一个元素，及其module则保存到了topo_list数组中
+p_mod(module_imglib_t)--|--- topology(module_imglib_topo_holder_t)[top_c].topo_list[par_c] = mct_list_append(p_mod->topology[top_c].topo_list[par_c],m_temp, NULL, NULL);
+                        |--- imglib_modules = mct_list_append(p_mod->imglib_modules, m_temp, NULL, NULL); 把所有的imglib module都保存到这里，没有重复 
+                        |--- dummy_port = module_imglib_create_dummy_port(p_mct_mod, MCT_PORT_SRC);
+
+
+
+
+static module_imglib_topology_t (t)[] = { \
+  { .stream_type = CAM_STREAM_TYPE_PREVIEW, \
+    .port_events_mask = MODULE_IMGLIB_PORT_PARSE_SUPER_PARAMS, \
+    .modules[0] = {MOD_IMGLIB_FACEPROC}, \
+    .session_params = {CAM_INTF_PARM_FD, CAM_INTF_PARM_MAX}, \
+  }, \
+  { .stream_type = CAM_STREAM_TYPE_PARM, \
+    .port_events_mask = MODULE_IMGLIB_PORT_PARSE_SUPER_PARAMS, \
+    .modules[0] = {MOD_IMGLIB_FACEPROC}, \
+    .modules[1] = {MOD_IMGLIB_DCRF}, \
+    .session_params = {CAM_INTF_PARM_FD, CAM_INTF_PARM_DCRF, CAM_INTF_PARM_MAX}, \
+  }, \
+  { .stream_type = CAM_STREAM_TYPE_PARM, \
+    .port_events_mask = MODULE_IMGLIB_PORT_PARSE_SUPER_PARAMS, \
+    .modules[0] = {MOD_IMGLIB_FACEPROC}, \
+    .session_params = {CAM_INTF_PARM_FD, CAM_INTF_PARM_MAX}, \
+  }, 
+};
+
+6. stats_module_init(stats模块里的所有port不在初始化模块阶段创建，都是在start session期间创建)
+
+mod = stats_mods_list[i].init_mod(stats_mods_list[i].name);
+stats_mods_list contain of ("q3a","afd","asd"...)
+                     |--- module_private = sub_mod_list = mct_list_append(sub_mod_list, mod, NULL, NULL);
+                     |--- set_mod = stats_module_set_mod
+                     |--- start_session = stats_module_start_session
+stats(mct_module_t)--|--- set_session_data = stats_module_set_session_data
+                     |---  
+                     |     
+                     |
+                     | 
+
+
+                                                              |--- aec_module = aec_module_init("aec");
+                   |--- module_private(q3a_module_private_t)--|--- awb_module = awb_module_init("awb");
+                   |---                                       |--- af_module = af_module_init("af");
+q3a(mct_module_t)--|---
+                   |---
+                   |---
