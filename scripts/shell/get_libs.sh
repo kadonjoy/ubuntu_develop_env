@@ -3,18 +3,20 @@
 #
 # Author: kadon
 # USAGE:
-#        AutoFlash.sh -g libmmcamera_ov13870 -k media
+#        AutoFlash.sh --get libmmcamera_ov13870 --flash libmmcamera_ov13870
 #
-source ~/FONT_FORMAT.sh
+source ~/scripts/FONT_FORMAT.sh
 
 VERSION="0.1"
 TARGET="le_x10"
 SERVER_IP="10.142.130.25"
-WORK_PATH="/letv/workspace/leui_mainline/"
-SERVER_IP="10.142.132.221"
-WORK_PATH="/home/andbase/workspace/work/x10_pnp/"
+#WORK_PATH="/letv/workspace/leui_mainline/"
+WORK_PATH="/letv/workspace/X10_N_UI/"
+#TARGET="le_x2"
+#SERVER_IP="10.142.132.221"
+#WORK_PATH="/home/andbase/workspace/work/Android_N/"
+#WORK_PATH="/home/andbase/workspace/work/qualcomBaseN/"
 LIB_PATHES=("/system/vendor/lib/" "/system/lib/hw/" "/system/lib/")
-IMAGES_LIST=("boot" "system" "userdata")
 DEV_LIB_PATH=""
 
 function usage_help ()
@@ -22,7 +24,7 @@ function usage_help ()
     printf $DEEP_GREEN_FONT"Android Auto Flash Shareed Lib Script Rev %s\n"$COLOR_EOF $VERSION
 cat << EOF
     Usage is:
-    AutoFlash <OPTION> <libname> <OPTION> <processname> ...
+    $0 <OPTION> <libname> <OPTION> <processname> ...
 
     AutoFlash script will help to get lib from remote host,
     and to flash them into device.
@@ -80,7 +82,8 @@ function killcam()
     printf $DEEP_GREEN_FONT"... Enter Function: %s ...\n"$COLOR_EOF ${FUNCNAME[0]}
     if [ "x"${1} == "xmedia" ]; then
         printf $RED_FONT"PREPARE TO killing media server"$COLOR_EOF
-        MEDIASERVER_PID=$(adb shell ps | grep 'mediaserver' | awk -F" " '{print $2}')
+        #MEDIASERVER_PID=$(adb shell ps | grep 'mediaserver' | awk -F" " '{print $2}')
+        MEDIASERVER_PID=$(adb shell ps | grep 'cameraserver' | awk -F" " '{print $2}')
         adb shell kill -9 ${MEDIASERVER_PID}
         printf $RED_FONT$PROMPT$COLOR_EOF
         printf $RED_FONT"Killing mediaserver  process : %s\n"$COLOR_EOF ${MEDIASERVER_PID}
