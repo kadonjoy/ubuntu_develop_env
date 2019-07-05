@@ -16,6 +16,7 @@ set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
 Bundle 'gmarik/vundle'
+Bundle 'hdima/python-syntax'
 Bundle 'c.vim'
 Bundle 'a.vim'
 Bundle 'taglist.vim'
@@ -34,7 +35,8 @@ Bundle 'honza/vim-snippets'
 Bundle 'godlygeek/tabular'
 Bundle 'majutsushi/tagbar'
 Bundle 'vim-cscope'
-Bundle 'Valloric/YouCompleteMe'
+"Bundle 'Valloric/YouCompleteMe'
+"Bundle 'vim-scripts/DrawIt'
 
 filetype plugin indent on
 
@@ -50,6 +52,7 @@ set incsearch
 set hlsearch
 set nu
 set ic
+set so=10
 
 syntax on
 
@@ -58,7 +61,8 @@ set t_Co=256
 let g:molokai_original=1
 let g:rehash256=1
 "colorscheme inkpot
-colorscheme molokai
+"colorscheme torte
+"colorscheme molokai
 "colorscheme monokai-chris
 
 let g:C_FormatDate            = '%F'
@@ -67,6 +71,7 @@ let g:C_FormatYear            = '%Y'
 
 " key mapping
 let mapleader=","
+let g:C_MapLeader  = ','
 nmap <leader>x :wq<CR>
 nmap <leader>z :q!<CR>
 nmap <leader>w :NERDTreeToggle<CR>
@@ -115,6 +120,34 @@ let g:tagbar_type_go = {
     \ 'ctagsargs' : '-sort -silent'
 \ }
 
+" python env configurations
+let python_highlight_all = 1
+" auto add pyhton header --start
+autocmd BufNewFile *.py 0r /home/xiashy/.vim/bundle/python-syntax/templates/python-template-header
+autocmd BufNewFile *.py ks|call FileName()|'s
+autocmd BufNewFile *.py ks|call CreatedTime()|'s
+
+function! FileName()
+    if line("$") > 10
+        let l = 10  "这里是字母L 不是数字1
+    else
+        let l = line("$")
+    endif
+    exe "1," . l . "g/Filename:.*/s/Filename:.*/Filename: " .expand("%")
+       "最前面是数字1，这里的File Name: 要和模板中一致
+endfunction
+
+function! CreatedTime()
+    if line("$") > 10
+        let l = 10
+    else
+        let l = line("$")
+    endif
+    exe "1," . l . "g/Created:.*/s/Created:.*/Created: " .strftime("%Y-%m-%d %T")
+        "这里Create Time: 要和模板中一致
+endfunction
+"auto add python header --end
+
 " for golang environment
 autocmd FileType go nmap <F5> :TagbarToggle<CR>
 let g:godef_same_file_in_same_window=1
@@ -143,5 +176,14 @@ au filetype go nmap <leader>t :TagbarToggle<CR>
 let Tlist_Show_One_File=1
 let Tlist_Exit_OnlyWindow=1
 
-
 "#######################################################
+"
+"set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
+set termencoding=utf-8
+set encoding=utf-8
+
+packadd termdebug
+let termdebugger="arm-linux-android-gdb"
+
+set nocompatible
+set backspace=indent,eol,start
